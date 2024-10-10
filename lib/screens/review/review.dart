@@ -19,7 +19,7 @@ class _ReviewState extends State<Review> {
   final List<PageContent> pages = [
     const PageContent(
       title: 'Tu equipo',
-      paragraph: 'Cargando equipo...',
+      paragraph: 'No hay conexión ',
     ),
   ];
 
@@ -78,7 +78,7 @@ class _ReviewState extends State<Review> {
           Center(
             child: Container(
               width: 300,
-              height: 450,
+              height: 400, // Define una altura máxima para el contenedor
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.8),
