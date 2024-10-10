@@ -7,12 +7,12 @@ class Header extends StatelessWidget {
     super.key,
     required this.searchController,
     required this.capturedPokemons,
-    required this.onChanged,
+    required this.onSearch,
   });
 
   final TextEditingController searchController;
   final List<Pokemon> capturedPokemons;
-  final Function onChanged;
+  final VoidCallback onSearch;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class Header extends StatelessWidget {
               prefixIcon: IconButton(
                 icon: const Icon(Icons.search),
                 onPressed: () {
-                  onChanged();
+                  onSearch();
                 },
               ),
               hintText: 'Buscar Pokémon',

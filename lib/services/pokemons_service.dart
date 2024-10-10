@@ -6,7 +6,22 @@ import 'package:http/http.dart' as http;
 
 class PokemonsService {
   final String? baseUrl = dotenv.env['POKE_API'];
+
+  // Limite máximo de Pokémon permitidos
+  final int maxPokemons = 150;
+  final int itemsPerPage = 30;
+
   Future<List<Pokemon>> fetchPokemons(int limit, int offset) async {
+    // Validar que no se supere el límite de 150 Pokémon
+    if (offset + limit > maxPokemons) {
+      throw Exception('No se pueden cargar más de $maxPokemons Pokémon.');
+    }
+
+    // Ajustar el límite en caso de que la cantidad solicitada exceda el máximo permitido
+    if (limit > maxPokemons - offset) {
+      limit = maxPokemons - offset;
+    }
+
     final response = await http.get(Uri.parse(
       '$baseUrl/pokemon?limit=$limit&offset=$offset',
     ));
@@ -33,36 +48,16 @@ class PokemonsService {
     }
   }
 
-  Future<List<Pokemon>> searchPokemonByName(String name) async {
+  Future<Pokemon?> fetchPokemonByName(String name) async {
     final response = await http.get(Uri.parse('$baseUrl/pokemon/$name'));
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      return [Pokemon.fromJson(data)]; // Retorna solo un Pokémon
+      return Pokemon.fromJson(json.decode(response.body));
+    } else if (response.statusCode == 404) {
+      // Si no se encuentra el Pokémon
+      return null;
     } else {
-      throw Exception('No Pokémon found with the name $name');
-    }
-  }
-
-  // Search Pokémon by type with pagination
-  Future<List<Pokemon>> searchPokemonByType(
-      String type, int limit, int offset) async {
-    final response = await http.get(Uri.parse('$baseUrl/type/$type'));
-
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      List results = data['pokemon'];
-
-      // Paginar los resultados obtenidos por tipo
-      List<Pokemon> paginatedResults = results
-          .skip(offset)
-          .take(limit)
-          .map<Pokemon>((item) => Pokemon.fromJson(item['pokemon']))
-          .toList();
-
-      return paginatedResults;
-    } else {
-      throw Exception('No Pokémon found with the type $type');
+      throw Exception('Failed to load Pokémon');
     }
   }
 }

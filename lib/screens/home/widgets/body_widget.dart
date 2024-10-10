@@ -1,15 +1,17 @@
 import 'dart:convert';
 
 import 'package:controlcar/models/pokemon_model.dart';
-import 'package:controlcar/screens/home/widgets/bottom_modal_team_widget.dart';
+import 'package:controlcar/screens/home/widgets/error_search_widget.dart';
 import 'package:controlcar/screens/home/widgets/header_widget.dart';
 
 import 'package:controlcar/screens/home/widgets/list_item_widget.dart';
 import 'package:controlcar/services/pokemons_service.dart';
 import 'package:controlcar/utils/loading_animation.dart';
+import 'package:controlcar/utils/text_formatter.dart';
 
 import 'package:controlcar/widgets/snack_bar_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Body extends StatefulWidget {
@@ -22,19 +24,89 @@ class Body extends StatefulWidget {
 class _BodyState extends State<Body> {
   List<Pokemon> pokemons = [];
   List<Pokemon> capturedPokemons = [];
+  Pokemon? searchedPokemon;
   int currentPage = 0;
-  final int itemsPerPage = 20;
+  final int itemsPerPage = 30;
   bool isLoading = false;
   bool hasError = false;
   bool isModalActive = false;
+  bool pokemonNotAllowed = false;
   TextEditingController searchController = TextEditingController();
-  final PokemonsService _pokemonService = PokemonsService();
 
   @override
   void initState() {
     super.initState();
     _loadCapturedPokemons();
     _fetchPokemonData();
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
+
+  // Método para buscar Pokémon por nombre usando la API
+  Future<void> _searchPokemonByName() async {
+    final query = searchController.text.trim();
+
+    if (query.isEmpty) {
+      setState(() {
+        searchedPokemon = null;
+        currentPage = 0;
+      });
+      _fetchPokemonData();
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+      hasError = false;
+      searchedPokemon = null;
+    });
+
+    try {
+      final pokemon =
+          await PokemonsService().fetchPokemonByName(query.toLowerCase());
+
+      if (pokemon != null) {
+        if (pokemon.id > 150) {
+          // Si el ID del Pokémon es mayor a 150, mostrar la imagen de advertencia
+          // ignore: use_build_context_synchronously
+          showSnackBar(
+            context,
+            Colors.red[300]!,
+            Text(
+                '${capitalizeFirstLetter(pokemon.name)} no corresponde a la primera generación'),
+          );
+          setState(() {
+            searchedPokemon = null;
+            hasError = false;
+            pokemonNotAllowed = true;
+          });
+        } else {
+          // Si el Pokémon es válido (id <= 150)
+          setState(() {
+            searchedPokemon = pokemon;
+            pokemonNotAllowed = false; // No mostrar la advertencia
+          });
+        }
+      } else {
+        setState(() {
+          hasError = true;
+          pokemonNotAllowed = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        hasError = true;
+        pokemonNotAllowed = false;
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   // Metodo para cargar datos de la API según la página
@@ -63,6 +135,9 @@ class _BodyState extends State<Body> {
 
   // Metodo para cambiar de página
   void _changePage(int newPage) {
+    if (newPage > 5) {
+      return;
+    }
     setState(() {
       currentPage = newPage;
     });
@@ -122,7 +197,11 @@ class _BodyState extends State<Body> {
         // Añadir el Pokémon capturado al inicio
         capturedPokemons.insert(0, pokemon);
         // Mostrar Snackbar con el nombre del Pokémon capturado
-        showSnackBar(context, pokemon.name);
+        showSnackBar(
+          context,
+          Colors.green[300]!,
+          Text('¡Ya está! ${capitalizeFirstLetter(pokemon.name)} atrapado!'),
+        );
       }
       _saveCapturedPokemons();
     });
@@ -137,80 +216,109 @@ class _BodyState extends State<Body> {
           child: Column(
             children: [
               if (isLoading) const Expanded(child: LoadingAnimation()),
-              if (hasError) const Text('Error al cargar los datos.'),
+
+              // Header con el input de búsqueda
               if (!isLoading)
                 Header(
                   searchController: searchController,
                   capturedPokemons: capturedPokemons,
-                  onChanged: () {},
+                  onSearch: _searchPokemonByName,
                 ),
+
               if (!isLoading && !hasError) ...[
                 const SizedBox(height: 20),
-                Expanded(
-                  child: GridView.count(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    children: List.generate(pokemons.length, (index) {
-                      final pokemon = pokemons[index];
-                      final isCaptured =
-                          capturedPokemons.any((p) => p.id == pokemon.id);
 
-                      return GestureDetector(
-                        onTap: () => addPokemon(pokemon),
-                        child: PokemonListItem(
-                          isCaptured: isCaptured,
-                          pokemonName: pokemon.name,
-                          pokemonTypes:
-                              pokemon.types.map((type) => type.name).toList(),
-                          pokemonNumber: pokemon.id.toString(),
-                          pokemonImageUrl: pokemon.imageUrl,
+                // Si hay un resultado de búsqueda o todos los pokemones
+                Expanded(
+                  child: searchedPokemon != null
+                      ? GridView.count(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          children: [
+                            GestureDetector(
+                              onTap: () => addPokemon(searchedPokemon!),
+                              child: PokemonListItem(
+                                isCaptured: capturedPokemons
+                                    .any((p) => p.id == searchedPokemon!.id),
+                                pokemonName: searchedPokemon!.name,
+                                pokemonTypes: searchedPokemon!.types
+                                    .map((type) => type.name)
+                                    .toList(),
+                                pokemonNumber: searchedPokemon!.id.toString(),
+                                pokemonImageUrl: searchedPokemon!.imageUrl,
+                              ),
+                            ),
+                          ],
+                        )
+                      : GridView.count(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          children: List.generate(pokemons.length, (index) {
+                            final pokemon = pokemons[index];
+                            final isCaptured =
+                                capturedPokemons.any((p) => p.id == pokemon.id);
+
+                            return GestureDetector(
+                              onTap: () => addPokemon(pokemon),
+                              child: PokemonListItem(
+                                isCaptured: isCaptured,
+                                pokemonName: pokemon.name,
+                                pokemonTypes: pokemon.types
+                                    .map((type) => type.name)
+                                    .toList(),
+                                pokemonNumber: pokemon.id.toString(),
+                                pokemonImageUrl: pokemon.imageUrl,
+                              ),
+                            );
+                          }),
                         ),
-                      );
-                    }),
-                  ),
                 ),
                 const SizedBox(height: 16),
               ],
+
+              // Mostrar una imagen cuando hay un error
+              if (hasError && !isLoading) ErrorSearch(),
             ],
           ),
         ),
-        // Botones flotantes para navegación
-        !isLoading
-            ? Positioned(
-                bottom: 16,
-                left: 16,
-                child: FloatingActionButton.extended(
-                  onPressed: currentPage > 0
-                      ? () => _changePage(currentPage - 1)
-                      : null,
-                  backgroundColor: Colors.transparent,
-                  elevation: 0,
-                  label: const Text("Anterior",
-                      style: TextStyle(color: Colors.black)),
-                  icon: const Icon(Icons.arrow_back, color: Colors.black),
-                ),
-              )
-            : const SizedBox.shrink(),
-        !isLoading
-            ? Positioned(
-                bottom: 16,
-                right: 16,
-                child: FloatingActionButton.extended(
-                  onPressed: () => _changePage(currentPage + 1),
-                  backgroundColor: Colors.transparent,
-                  elevation: 0,
-                  label: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text("Siguiente", style: TextStyle(color: Colors.black)),
-                      SizedBox(width: 8),
-                      Icon(Icons.arrow_forward, color: Colors.black),
-                    ],
-                  ),
-                ),
-              )
-            : const SizedBox.shrink(),
+
+        // Botones flotantes para cambiar de página
+        if (!isLoading && searchedPokemon == null && !hasError) ...[
+          Positioned(
+            bottom: 16,
+            left: 16,
+            child: FloatingActionButton.extended(
+              onPressed:
+                  currentPage > 0 ? () => _changePage(currentPage - 1) : null,
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              label:
+                  const Text("Anterior", style: TextStyle(color: Colors.black)),
+              icon: const Icon(Icons.arrow_back, color: Colors.black),
+            ),
+          ),
+          Positioned(
+            bottom: 16,
+            right: 16,
+            child: FloatingActionButton.extended(
+              onPressed: currentPage < 4
+                  ? () => _changePage(currentPage + 1)
+                  : null, // Si currentPage es 5 o mayor, el botón no hace nada
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              label: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text("Siguiente", style: TextStyle(color: Colors.black)),
+                  SizedBox(width: 8),
+                  Icon(Icons.arrow_forward, color: Colors.black),
+                ],
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

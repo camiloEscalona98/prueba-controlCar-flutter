@@ -133,8 +133,6 @@ class _ReviewState extends State<Review> {
                               ),
                             ),
                             const SizedBox(height: 20),
-                            //borrar
-                            const SizedBox(height: 20),
                           ],
                         ),
                       ),

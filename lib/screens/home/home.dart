@@ -19,7 +19,7 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    futurePokemons = PokemonsService().fetchPokemons(20, 0);
+    futurePokemons = PokemonsService().fetchPokemons(30, 0);
   }
 
   @override
