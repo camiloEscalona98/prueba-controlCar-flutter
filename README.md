@@ -37,3 +37,19 @@ La aplicación se ha diseñado con una arquitectura Modelo-Vista-Servicio para d
 1. Clona el repositorio:
    ```bash
    git clone https://github.com/camiloEscalona98/prueba-controlCar-flutter.git
+
+## Recursos Visuales
+
+Para ver imágenes y un video del funcionamiento de la aplicación, visita el siguiente enlace:
+
+[Imágenes y Video de la Aplicación](https://drive.google.com/drive/folders/1mfkhh9GMPHC_Vtn6u4UxYcrF__tx0eoh?usp=sharing)
+
+En este enlace podrás observar cómo funciona la aplicación, desde la búsqueda de Pokémon hasta la captura y almacenamiento de los mismos.
+
+## Descarga del APK
+
+Puedes descargar el APK de la aplicación desde el siguiente enlace:
+
+[Descargar APK](https://drive.google.com/drive/folders/1HaRsiMjhDuZeYuyPsC2QaEAIHkDmGkgy?usp=sharing)
+
+Nota: Al instalar la aplicación, es probable que Android solicite permisos adicionales para permitir la instalación de aplicaciones de fuentes externas. Asegúrate de habilitar la opción de instalar aplicaciones desde fuentes desconocidas en la configuración de tu dispositivo.
