@@ -4,12 +4,12 @@ import 'package:controlcar/utils/text_formatter.dart';
 import 'package:flutter/material.dart';
 
 class BottomModalTeam extends StatefulWidget {
-  final List<Pokemon>
-      capturedPokemons; // Lista de Pokémon capturados como parámetro
+  final List<Pokemon> capturedPokemons;
 
   const BottomModalTeam({super.key, required this.capturedPokemons});
 
   @override
+  // ignore: library_private_types_in_public_api
   _BottomModalTeamState createState() => _BottomModalTeamState();
 }
 
@@ -36,12 +36,10 @@ class _BottomModalTeamState extends State<BottomModalTeam> {
             child: Column(
               children: [
                 Image.network(
-                  widget.capturedPokemons[index]
-                      .imageUrl, // Uso de la lista pasada como parámetro
+                  widget.capturedPokemons[index].imageUrl,
                   fit: BoxFit.cover,
                   height: 150,
                   errorBuilder: (context, error, stackTrace) {
-                    // Muestra la imagen de una pokebola si hay un error al cargar la imagen
                     return Image.asset(
                       'assets/img/pokeball.png',
                       fit: BoxFit.cover,
@@ -56,7 +54,6 @@ class _BottomModalTeamState extends State<BottomModalTeam> {
           ),
         );
       } else {
-        // Si no hay pokemon, muestra la imagen de una pokebola
         return Container(
           color: Colors.black,
           child: Center(
@@ -92,7 +89,7 @@ class _BottomModalTeamState extends State<BottomModalTeam> {
                 // Acción del botón
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => Review()),
+                  MaterialPageRoute(builder: (context) => const Review()),
                 );
               },
               child: const Text('Evalúa tu equipo con IA'),

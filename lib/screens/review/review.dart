@@ -1,3 +1,4 @@
+import 'package:controlcar/models/page_content_model.dart';
 import 'package:controlcar/services/chat_gpt_service.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
@@ -24,7 +25,7 @@ class _ReviewState extends State<Review> {
   ];
 
   int currentIndex = 0;
-  bool isLoading = true; // Variable para controlar el estado de carga
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -33,24 +34,20 @@ class _ReviewState extends State<Review> {
   }
 
   Future<void> fetchResponse() async {
-    List<int> numeros = [1, 2, 3, 4, 5, 6]; // Cambia esto según sea necesario
+    List<int> numeros = [1, 2, 3, 4, 5, 6];
     try {
       final prueba = await chatGPTService.sendPrompt(numeros);
 
-      // Actualizar el contenido de las páginas con la respuesta
       setState(() {
         pages[0] = PageContent(
           title: 'Tu equipo',
           paragraph: prueba,
         );
-        isLoading = false; // Cambiar el estado de carga a falso
+        isLoading = false;
       });
     } catch (e) {
-      print('Error al obtener respuesta: $e');
-      // Manejar el error (puedes mostrar un mensaje de error en la UI si lo deseas)
       setState(() {
-        isLoading =
-            false; // Cambiar el estado de carga a falso incluso si hay un error
+        isLoading = false;
       });
     }
   }
@@ -78,7 +75,7 @@ class _ReviewState extends State<Review> {
           Center(
             child: Container(
               width: 300,
-              height: 400, // Define una altura máxima para el contenedor
+              height: 400,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.8),
@@ -99,22 +96,20 @@ class _ReviewState extends State<Review> {
                         const SizedBox(height: 20),
                         Center(
                           child: Lottie.asset(
-                            'assets/img/loading_ia.json', // Ruta a tu archivo Lottie
-                            width: 150, // Ancho de la animación
-                            height: 150, // Altura de la animación
-                            repeat: true, // Repetir la animación
-                            reverse: false, // No revertir la animación
-                            animate: true, // Animar la Lottie
+                            'assets/img/loading_ia.json',
+                            width: 150,
+                            height: 150,
+                            repeat: true,
+                            reverse: false,
+                            animate: true,
                           ),
-                        ), // Indicador de carga
+                        ),
                         const SizedBox(height: 20),
                       ],
                     )
                   : Scrollbar(
-                      // Ajusta el padding aquí
                       child: SingleChildScrollView(
-                        padding: const EdgeInsets.only(
-                            right: 8.0), // Espaciado adicional a la derecha
+                        padding: const EdgeInsets.only(right: 8.0),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,11 +138,4 @@ class _ReviewState extends State<Review> {
       ),
     );
   }
-}
-
-class PageContent {
-  final String title;
-  final String paragraph;
-
-  const PageContent({required this.title, required this.paragraph});
 }

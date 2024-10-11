@@ -23,21 +23,18 @@ class ListItemSkeleton extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Carga de nombre
           Container(
             height: 20,
             width: 100,
             color: Colors.grey[300],
           ),
           const SizedBox(height: 4),
-          // Carga del número
           Container(
             height: 16,
             width: 50,
             color: Colors.grey[300],
           ),
           const SizedBox(height: 8),
-          // Carga de tipos
           Row(
             children: [
               Container(

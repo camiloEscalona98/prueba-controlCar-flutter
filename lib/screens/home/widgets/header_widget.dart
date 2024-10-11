@@ -21,9 +21,6 @@ class Header extends StatelessWidget {
         Expanded(
           child: TextField(
             controller: searchController,
-            /* onChanged: (value) {
-              onChanged();
-            }, */
             decoration: InputDecoration(
               prefixIcon: IconButton(
                 icon: const Icon(Icons.search),

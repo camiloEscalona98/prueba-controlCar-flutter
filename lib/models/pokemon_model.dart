@@ -30,9 +30,8 @@ class Pokemon {
     final imageUrl = (sprites != null && sprites['front_default'] != null)
         ? sprites['front_default']
         : (json['imageUrl'] != null && json['imageUrl'] != '')
-            ? json[
-                'imageUrl'] // Si imageUrl en el JSON no es nulo ni vacío, se utiliza
-            : 'default_image_url.png'; // Valor por defecto si no hay URL válida
+            ? json['imageUrl']
+            : 'default_image_url.png';
 
     return Pokemon(
       name: json['name'] ?? 'Unknown',
@@ -57,14 +56,14 @@ class TypeDetail {
 
   TypeDetail({required this.name});
 
-  // Método para convertir un objeto TypeDetail a JSON
+  // Metodo para convertir un objeto typeDetail a JSON
   Map<String, dynamic> toJson() {
     return {
       'name': name,
     };
   }
 
-  // Método para crear un objeto TypeDetail desde JSON
+  // Metodo para crear un objeto typeDetail desde JSON
   factory TypeDetail.fromJson(Map<String, dynamic> json) {
     return TypeDetail(name: json['name']);
   }
@@ -90,7 +89,7 @@ class PokemonResult {
 
   PokemonResult({required this.name, required this.url});
 
-  // Método para convertir un objeto PokemonResult a JSON
+  // Metodo para convertir un objeto PokemonResult a JSON
   Map<String, dynamic> toJson() {
     return {
       'name': name,
@@ -98,7 +97,7 @@ class PokemonResult {
     };
   }
 
-  // Método para crear un objeto PokemonResult desde JSON
+  // Metodo para crear un objeto PokemonResult desde JSON
   factory PokemonResult.fromJson(Map<String, dynamic> json) {
     return PokemonResult(
       name: json['name'],
